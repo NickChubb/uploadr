@@ -1,25 +1,37 @@
-import { useState, useEffect } from 'react'
+import {useCallback} from 'react'
+import {useDropzone} from 'react-dropzone'
 import Head from 'next/head'
-import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 
 // COMPONENTS
-import FileCard from './components/FileCard'
+import DisplayFiles from './components/DisplayFiles'
 
 export default function Home() {
 
-  const [ files, setFiles ] = useState(null);
+  const onDrop = useCallback(acceptedFiles => {
 
-  const getFiles = () => {
-    
-  }
+    // Upload files to server
+    acceptedFiles.forEach(file => {
 
-  useEffect(() => {
-    
-  });
+      var formData = new FormData();
+      formData.append('file', file);
+
+      fetch('/api/files', {
+        method: 'POST',
+        body: formData,
+      });
+
+    })
+
+  }, [])
+
+  const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop})
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} {...getRootProps()}>
+
+      <input {...getInputProps()} />
+
       <Head>
         <title>Uploadr</title>
         <meta name="description" content="Drag-and-drop File Uploader" />
@@ -27,23 +39,13 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
+
         <h1 className={styles.title}>
           Uploadr
         </h1>
 
-        <div className={styles.grid}>
-
-          {
-            // Return card for each file.
-            files && files.length > 0 ? 
-              files.map((file, key) => {
-                <FileCard name={file.name} path={file.path} />
-              })
-              :
-              <p>No files to display, drag and drop anywhere to upload.</p> 
-          }
-
-        </div>
+        <DisplayFiles />
+        
       </main>
 
       <footer className={styles.footer}>
